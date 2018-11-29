@@ -27,7 +27,7 @@ def generate_norm_dic():
 
     bits = []
     for i in range(0, 8):
-        bits.append(1<<(7-i))
+        bits.append(1 >> (7-i))
 
     for i in range(0, 256):
         previous0 = False
@@ -37,9 +37,9 @@ def generate_norm_dic():
         one_value = 0
 
         for bit_value in bits:
-            current_bit = bit_value & i>0
+            current_bit = bit_value & i > 0
 
-            if previous0 != current_bit :
+            if previous0 != current_bit:
                 zero_value += bit_value
 
             if previous1 != current_bit:
@@ -51,8 +51,8 @@ def generate_norm_dic():
         dic['zero'].append(zero_value)
         dic['one'].append(one_value)
 
-        dic['reverse_zero'][ zero_value ] = i
-        dic['reverse_one'][ one_value ] = i
+        dic['reverse_zero'][zero_value] = i
+        dic['reverse_one'][one_value] = i
 
     return dic
 
@@ -66,7 +66,7 @@ def transform_bytes(byte_list, dictionary, is_reverse):
     for byte_v in byte_list:
         replacement = dictionary[one_index][byte_v] if previous else dictionary[zero_index][byte_v]
         new_values.append(replacement)
-        previous = dictionary['last'][ replacement if is_reverse else byte_v ]
+        previous = dictionary['last'][replacement if is_reverse else byte_v]
 
     return new_values
 
