@@ -1,83 +1,99 @@
+#!/bin/python3
+
 import sys
+import random
 
+from bits_analytics import BitsAnalytics
 
+"""Data analytics"""
 
-def get_binary_descriptor_dictionary():
-    """Return a dictionary for descriptor"""
+def generate_norm_dic():
 
-    dic0 = []
-    dic1 = []
+    dic = {
+        'zero': [],
+        'one': [],
+        'reverse_zero': [],
+        'reverse_one': [],
+        'last': []
+    }
+
+    for i in range(0, 256):
+        dic['last'].append(i & 1)
+        dic['reverse_zero'].append(0)
+        dic['reverse_one'].append(0)
+
+    previous0 = False
+    previous1 = True
+
+    bits = []
+    for i in range(0, 8):
+        bits.append(1<<(7-i))
 
     for i in range(0, 256):
         previous0 = False
         previous1 = True
 
-        dic_value0 = 0
-        dic_value1 = 0
+        zero_value = 0
+        one_value = 0
 
-        for bit_index in range(0, 8):
-            bit = (i & (1 << (7-bit_index))) > 0
+        for bit_value in bits:
+            current_bit = bit_value & i>0
 
-            if previous0 == bit:
-                dic_value0 += (1 << (7-bit_index))
+            if previous0 != current_bit :
+                zero_value += bit_value
 
-            if previous1 == bit:
-                dic_value1 += (1 << (7-bit_index))
+            if previous1 != current_bit:
+                one_value += bit_value
 
-            previous0 = bit
-            previous1 = bit
+            previous0 = current_bit
+            previous1 = current_bit
 
-        dic0.append(dic_value0)
-        dic1.append(dic_value1)
+        dic['zero'].append(zero_value)
+        dic['one'].append(one_value)
 
+        dic['reverse_zero'][ zero_value ] = i
+        dic['reverse_one'][ one_value ] = i
 
-def to_binary_descriptor(binary_list):
-    for i in binary_list:
-
-
-
-
-        tuppleCounter[  3 & i  ]+=1
-        tuppleCounter[  (12 & i) >> 2  ]+=1
-        tuppleCounter[  (48 & i) >> 4  ]+=1
-        tuppleCounter[  (192 & i ) >> 6  ]+=1
-
-        counter+=1
-
-        for x in range( 0,8):
-            current = (( 1 <<  x ) & i )>0;
-            if last == -1 :
-                if current :
-                    lines.append( 1 )
-                else:
-                    lines.append( 0 )
-            elif current:
-                    lines.append( 1 )
-            else:
-                    lines.append( 0 )
-
-        if( counter >= 128 ):
-            print('\t'.join(map(str,lines)))
-            lines.clear()
-            counter = 0;
+    return dic
 
 
+def transform_bytes(byte_list, dictionary, is_reverse):
+    new_values = []
+    previous = False
+    zero_index = 'reverse_zero' if is_reverse else  'zero'
+    one_index = 'reverse_one' if is_reverse else 'one'
+
+    for byte_v in byte_list:
+        replacement = dictionary[one_index][byte_v] if previous else dictionary[zero_index][byte_v]
+        new_values.append(replacement)
+        previous = dictionary['last'][ replacement if is_reverse else byte_v ]
+
+    return new_values
 
 
+def test_transform():
+    total = 1024
 
-    bitCounter  = [0,0];
-    tuppleCounter = [ 0, 0, 0 ,0 ]
-    byteCounter = [ 0, 0, 0, 0, 0, 0, 0, 0]
-    indexes =[ 3, 3<<2, 3<<4, 3<<6 ]
-    move    =[ 0, 2, 4, 6 ]
+    rand_list = []
+    print(rand_list, ", ")
+    for i in range(0, total):
+        ##rand_list.append(i)
+        rand_list.append(random.randrange(0, 256))
 
-    lines   = [];
+    ba = BitsAnalytics()
+    ba.process_list(rand_list)
+    ba.printx()
 
-    counter = 0;
-    last = -1;
 
-    print("P1\n1024\n1024")
+    dic = generate_norm_dic()
+    norm_list = transform_bytes(rand_list, dic, False)
+    #print("byte_list", norm_list)
+    original = transform_bytes(norm_list, dic, True)
+    #print("result", original)
 
-    with open('1M2.bin', 'rb') as fl:
-        b = fl.read()
+    for i in range(0, total):
+        if rand_list[i] != original[i]:
+            raise Exception("Doenst work")
 
+if __name__ == "__main__":
+    test_transform()
