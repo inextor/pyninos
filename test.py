@@ -27,7 +27,7 @@ def generate_norm_dic():
 
     bits = []
     for i in range(0, 8):
-        bits.append(1 >> (7-i))
+        bits.append(1 << (7-i))
 
     for i in range(0, 256):
         previous0 = False
@@ -37,7 +37,7 @@ def generate_norm_dic():
         one_value = 0
 
         for bit_value in bits:
-            current_bit = bit_value & i > 0
+            current_bit = ( bit_value & i ) > 0
 
             if previous0 != current_bit:
                 zero_value += bit_value
@@ -71,29 +71,58 @@ def transform_bytes(byte_list, dictionary, is_reverse):
     return new_values
 
 
-def test_transform():
-    total = 1024
+def test_transform(debug):
 
     rand_list = []
-    print(rand_list, ", ")
-    for i in range(0, total):
-        ##rand_list.append(i)
-        rand_list.append(random.randrange(0, 256))
+
+    for i in range(0, 256):
+        rand_list.append(i)
 
     ba = BitsAnalytics()
     ba.process_list(rand_list)
     ba.printx()
 
-
     dic = generate_norm_dic()
+
+    print("dictionary",dic)
+
     norm_list = transform_bytes(rand_list, dic, False)
-    #print("byte_list", norm_list)
     original = transform_bytes(norm_list, dic, True)
-    #print("result", original)
+
+    if debug:
+        print("byte_list", rand_list )
+        print("norm list", norm_list)
+        print("result", original)
+
+    for i in range(0, 256):
+        if rand_list[i] != original[i]:
+            raise Exception("Doenst work")
+
+
+def test_transform_random():
+    total = 1024
+    dic = generate_norm_dic()
+    rand_list = []
+
+    for i in range(0, 1024):
+        rand_list.append( random.randrange(0,256) )
+
+    norm_list = transform_bytes(rand_list, dic, False)
+    original = transform_bytes( norm_list, dic, True )
+    print("byte_list", norm_list)
+    print("result", original)
 
     for i in range(0, total):
         if rand_list[i] != original[i]:
             raise Exception("Doenst work")
 
+    image_string = ba.generate_bars_image( ba.byte_diff )
+
+    text_file = open("image.pbm", "w")
+    text_file.write( image_string )
+    text_file.close()
+
+
 if __name__ == "__main__":
-    test_transform()
+    test_transform( True )
+    #test_transform_random()
