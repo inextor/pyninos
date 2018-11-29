@@ -1,28 +1,33 @@
+"""Bynary Data visualization"""
+
 import sys
 
-if __name__ == "__main__":
 
-
+def genera_img(filename):
+    """genera_img Generate a image of the binary data of the filename"""
     print("P1\n1024\n1024")
-    LINES = []
-    #print( sys.argv );
-    #exit()
+
+    lines = []
     counter = 0
 
-    with open(sys.argv[1], 'rb') as fl:
-        b = fl.read()
+    with open(filename, 'rb') as file_descriptor:
+        byte_list = file_descriptor.read()
 
-    for i in b:
-        counter+=1
-        for x in range( 0,8):
-            current = (( 1 <<  x ) & i )>0;
+    for i in byte_list:
+        counter += 1
 
-            if current :
-                lines.append( 1 )
+        for zero_eight in range(0, 8):
+            current = ((1 <<  zero_eight) & i) > 0
+
+            if current:
+                lines.append(1)
             else:
-               lines.append( 0 )
+                lines.append(0)
 
-        if( counter >= 128 ):
-            print('\t'.join(map(str,lines)))
+        if counter >= 128:
+            print('\t'.join(map(str, lines)))
             lines.clear()
-            counter = 0;
+            counter = 0
+
+if __name__ == "__main__":
+    genera_img(sys.argv[1])
