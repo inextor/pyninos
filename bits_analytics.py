@@ -1,13 +1,15 @@
 """This module is for bytes analitycs"""
 
-class BitsAnalitycs:
+class BitsAnalytics:
     """This class helps to count bits and bytes"""
     def __init__(self):
         self.byte_counter = [0]*256
+        self.byte_diff = [0]*256
         self.bit_counter = [0, 0]
         self.dupla_counter = [0, 0, 0, 0]
         self.total = 0
         self.byte_strings = []
+        self.byte_previous = 0
 
         self.bit_dictionary = [[], []]
         self.dupla_dictionary = [[], [], [], []]
@@ -32,9 +34,9 @@ class BitsAnalitycs:
 
             dp_counter = [0, 0, 0, 0]
             dp_counter[3 & i] += 1
-            dp_counter[(12 & i) >> 2] += 1
-            dp_counter[(48 & i) >> 4] += 1
-            dp_counter[(192 & i) >> 6] += 1
+            dp_counter[(12 & i)>> 2] += 1
+            dp_counter[(48 & i)>> 4] += 1
+            dp_counter[(192 & i)>> 6] += 1
 
             for d_p in range(0, 4):
                 self.dupla_dictionary[d_p].append(dp_counter[d_p])
@@ -51,6 +53,11 @@ class BitsAnalitycs:
 
         self.bit_counter[0] += self.bit_dictionary[0][byte_value]
         self.bit_counter[1] += self.bit_dictionary[1][byte_value]
+        max_val = max(self.byte_previous, byte_value)
+        min_val = min(self.byte_previous, byte_value)
+        self.byte_diff[max_val-min_val] += 1
+        self.byte_previous = byte_value
+
 
 
     def process_list(self, byte_list):
@@ -65,6 +72,9 @@ class BitsAnalitycs:
         print("bits", self.bit_counter)
         print("duplas", self.dupla_counter)
         print("Counter Average", sum(self.byte_counter)/256.0)
+        print("Max diff", max(self.byte_diff))
+        print("Min diff", min(self.byte_diff))
+        print("byte diff", slef.byte_diff)
 
 
     def generate_pbm_image(self, byte_list, width):
@@ -80,7 +90,7 @@ class BitsAnalitycs:
         for i in range(0, width*height):
             string_image += self.byte_strings[byte_list[i]]
 
-            if(i%width) == 0:
+            if(i%width)== 0:
                 string_image += '\n'
 
         return string_image
