@@ -98,13 +98,22 @@ def test_transform(debug):
         if rand_list[i] != original[i]:
             raise Exception("Doenst work")
 
+    ba = BitsAnalytics()
+    ba.process_list(norm_list)
+    image_string = ba.generate_pbm_image( norm_list, 1000 )
+    ba.printx()
+
+    text_file = open("image.pbm", "w")
+    text_file.write(image_string)
+    text_file.close()
+
 
 def test_transform_random():
-    total = 1024
+    total = 4096
     dic = generate_norm_dic()
     rand_list = []
 
-    for i in range(0, 1024):
+    for i in range(0, total):
         rand_list.append( random.randrange(0,256) )
 
     norm_list = transform_bytes(rand_list, dic, False)
@@ -116,13 +125,18 @@ def test_transform_random():
         if rand_list[i] != original[i]:
             raise Exception("Doenst work")
 
+    ba = BitsAnalytics()
+    ba.process_list(norm_list)
+    ba.printx()
+
+
     image_string = ba.generate_bars_image( ba.byte_diff )
 
-    text_file = open("image.pbm", "w")
+    text_file = open("image.pgm", "w")
     text_file.write( image_string )
     text_file.close()
 
 
 if __name__ == "__main__":
-    test_transform( True )
-    #test_transform_random()
+    #test_transform( True )
+    test_transform_random()
