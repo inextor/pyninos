@@ -85,23 +85,23 @@ class BitsAnalytics:
         total = 0
 
         for item in new_list:
-            pixels = int(float(item)/float(maximun))*1000;
+            pixels = int(float(item)*500.0/float(maximun));
 
             tmp_str = ""
             total += item;
-            percent = int( total*100/total_elements )
+            percent = int(total*100.0/total_elements)
 
             print("Percent", percent )
 
             for x in range(0,500):
-                if percent > 90:
-                    tmp_str += "4 4 " if x <= item*2 else "0 0 "
-                elif percent > 75:
-                    tmp_str += "3 3 " if x <= item*2 else "0 0 "
+                if percent > 75:
+                    tmp_str += "4 4 " if x <= pixels else "0 0 "
                 elif percent > 50:
-                    tmp_str += "2 2 " if x <= item*2 else "0 0 "
+                    tmp_str += "3 3 " if x <= pixels else "0 0 "
+                elif percent > 25:
+                    tmp_str += "2 2 " if x <= pixels else "0 0 "
                 else:
-                    tmp_str += "1 1 " if x <= item*2 else "0 0 "
+                    tmp_str += "1 1 " if x <= pixels else "0 0 "
 
             for x in range(0,2):
                 string_image += tmp_str.strip()+"\n"

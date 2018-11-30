@@ -109,7 +109,7 @@ def test_transform(debug):
 
 
 def test_transform_random():
-    total = 4096
+    total = 1024*1024
     dic = generate_norm_dic()
     rand_list = []
 
@@ -118,15 +118,15 @@ def test_transform_random():
 
     norm_list = transform_bytes(rand_list, dic, False)
     original = transform_bytes( norm_list, dic, True )
-    print("byte_list", norm_list)
-    print("result", original)
+    #print("byte_list", norm_list)
+    #print("result", original)
 
     for i in range(0, total):
         if rand_list[i] != original[i]:
             raise Exception("Doenst work")
 
     ba = BitsAnalytics()
-    ba.process_list(norm_list)
+    ba.process_list( rand_list )
     ba.printx()
 
 
