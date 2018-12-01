@@ -119,20 +119,6 @@ class BitsAnalytics:
 
         return dictionary;
 
-
-    def generate_pos_dictionary(self):
-        """generate a transition position dictionary"""
-        dictionary = [0]*256
-
-        for i in self.byte_transitions:
-            z = i.copy();
-            z.sort(key=int)
-            z.reverse()
-            for index,value in enumerate(z):
-                dictionary[index]+=value;
-
-        return dictionary;
-
     def generate_transitions_image(self):
         """generate a image of the dictionary"""
         max_value = 0
@@ -251,9 +237,9 @@ if __name__ == "__main__":
 
     #b.printx()
     #print( b.generate_half_byte_dictionary() );
-    #print( b.generate_bars_image( b.generate_half_byte_dictionary() ) );
+    print( b.generate_bars_image( b.generate_pos_dictionary() ) );
     #b.generate_transitions_image()
-    print( b.generate_bars_image( b.generate_transitions_image()) )
+    #print( b.generate_bars_image( b.generate_transitions_image()) )
 
 
 #   1 2 3 4
