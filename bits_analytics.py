@@ -1,4 +1,5 @@
 """This module is for bytes analitycs"""
+import sys
 
 class BitsAnalytics:
     """This class helps to count bits and bytes"""
@@ -10,6 +11,9 @@ class BitsAnalytics:
         self.total = 0
         self.byte_strings = []
         self.byte_previous = 0
+        self.half_byte_previous = 0
+        self.byte_transitions = []
+        self.half_byte_transitions = []
 
         self.bit_dictionary = [[], []]
         self.dupla_dictionary = [[], [], [], []]
@@ -18,7 +22,11 @@ class BitsAnalytics:
         for i in range(0, 8):
             bits.append(1<<(7-i))
 
+        for i in range(0,16):
+            self.half_byte_transitions.append([0]*16)
+
         for i in range(0, 256):
+            self.byte_transitions.append([0]*256)
             byte_string = ''
             eight_bit_counter = 0
 
@@ -54,11 +62,25 @@ class BitsAnalytics:
 
             self.bit_counter[0] += self.bit_dictionary[0][byte_value]
             self.bit_counter[1] += self.bit_dictionary[1][byte_value]
+
             max_val = max(self.byte_previous, byte_value)
             min_val = min(self.byte_previous, byte_value)
             self.byte_diff[max_val-min_val] += 1
+
+            self.byte_transitions[self.byte_previous][byte_value] += 1
             self.byte_previous = byte_value
+
+            half_byte = byte_value>>4;
+            self.half_byte_transitions[ self.half_byte_previous ][ half_byte ] += 1
+            self.half_byte_previous = half_byte;
+            half_byte = (byte_value&0x0F)
+            self.half_byte_transitions[ self.half_byte_previous ][ half_byte ] += 1
+
+            self.half_byte_previous = half_byte
+
         except Exception as e:
+            print("Excpetion on ",e );
+            print("Excpetion on ",self.half_byte);
             print("Excpetion on ",byte_value );
             print("dupla counter ",len( self.dupla_counter ) )
             print("byte counter ",len( self.byte_counter ) )
@@ -69,6 +91,75 @@ class BitsAnalytics:
         for i in byte_list:
             self.process(i)
 
+
+    def generate_half_byte_dictionary(self):
+        """generate a transition position dictionary"""
+        dictionary = [0]*16
+
+        for i in self.half_byte_transitions:
+            z = i.copy();
+            z.sort(key=int)
+            z.reverse()
+            for index,value in enumerate(z):
+                dictionary[index]+=value;
+
+        return dictionary;
+
+
+    def generate_pos_dictionary(self):
+        """generate a transition position dictionary"""
+        dictionary = [0]*256
+
+        for i in self.byte_transitions:
+            z = i.copy();
+            z.sort(key=int)
+            z.reverse()
+            for index,value in enumerate(z):
+                dictionary[index]+=value;
+
+        return dictionary;
+
+
+    def generate_pos_dictionary(self):
+        """generate a transition position dictionary"""
+        dictionary = [0]*256
+
+        for i in self.byte_transitions:
+            z = i.copy();
+            z.sort(key=int)
+            z.reverse()
+            for index,value in enumerate(z):
+                dictionary[index]+=value;
+
+        return dictionary;
+
+    def generate_transitions_image(self):
+        """generate a image of the dictionary"""
+        max_value = 0
+
+        for i in self.byte_transitions:
+            for j in i:
+                if j > max_value:
+                    max_value = j
+
+        print("Max Value", max_value )
+
+        image = "P2\n1024\n1024\n"
+
+        for i in self.byte_transitions:
+            image_line = ""
+            z = i.copy();
+            z.sort(key=int)
+
+            for j in z:
+                percent = int( 1.0*j*255/max_value)
+                for k in range(0, 4):
+                    image_line += str(percent)+" "
+
+            for j in range(0, 4):
+                image += image_line.strip()+"\n"
+
+        return image;
 
     def generate_bars_image(self, list_256 ):
         """generate a image o pbm of array"""
@@ -81,7 +172,7 @@ class BitsAnalytics:
 
         print("Total",total_elements)
 
-        string_image = "P2 1000 512 4\n"
+        string_image = "P2\n1000 512\n4\n"
         total = 0
 
         for item in new_list:
@@ -91,10 +182,8 @@ class BitsAnalytics:
             total += item;
             percent = int(total*100.0/total_elements)
 
-            print("Percent", percent )
-
             for x in range(0,500):
-                if percent > 75:
+                if percent > 90:
                     tmp_str += "4 4 " if x <= pixels else "0 0 "
                 elif percent > 50:
                     tmp_str += "3 3 " if x <= pixels else "0 0 "
@@ -111,10 +200,10 @@ class BitsAnalytics:
 
     def printx(self):
         """Print the stats"""
-        print("t bytes", self.total)
-        print("bits", self.bit_counter)
-        print("duplas", self.dupla_counter)
-        print("Counter Average", sum(self.byte_counter)/256.0)
+        #print("t bytes", self.total)
+        #print("bits", self.bit_counter)
+        #print("duplas", self.dupla_counter)
+        #print("Counter Average", sum(self.byte_counter)/256.0)
 
         byte_diff_sum = 0
 
@@ -146,6 +235,25 @@ class BitsAnalytics:
         return string_image
 
 
+if __name__ == "__main__":
+
+    b = BitsAnalytics()
+
+    size = 1024*1024*2
+    data = sys.stdin.buffer.read(size)
+    result = bytearray( size )
+    readed_size = len(data)
+
+    while readed_size != 0:
+        b.process_list( data )
+        data = sys.stdin.buffer.read(size)
+        readed_size = len( data )
+
+    #b.printx()
+    #print( b.generate_half_byte_dictionary() );
+    #print( b.generate_bars_image( b.generate_half_byte_dictionary() ) );
+    #b.generate_transitions_image()
+    print( b.generate_bars_image( b.generate_transitions_image()) )
 
 
 #   1 2 3 4

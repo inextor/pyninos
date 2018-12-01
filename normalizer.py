@@ -1,8 +1,7 @@
 """This Module is to enable infinite compression"""
 
 import random
-
-
+import sys
 
 
 class Compress:
@@ -22,6 +21,15 @@ class Compress:
             self.previous = to_write
 
         return to_write
+
+    def process_list(self, byte_list, result):
+
+        size = len(byte_list)
+
+        for b in range(0,size):
+            result[b] = self.process(byte_list[b]);
+
+        return result
 
     def get_dictionary(self):
         to_compress = []
@@ -72,5 +80,34 @@ def test_transform():
 
 
 if __name__ == "__main__":
-    #test_transform( True )
-    test_transform()
+
+    is_to_compress = True
+    is_test = False
+
+    if( len( sys.argv ) > 1 ):
+        #print(">2")
+        if(sys.argv[1].find('-') != -1):
+            #print("------")
+            if(sys.argv[1].find('d') != -1 ):
+                is_to_compress = False
+                #print("is decompress")
+            if(sys.argv[1].find('t') != -1 ):
+                is_test = True
+                #print("is test")
+
+    if( is_test ):
+        test_transform()
+        sys.exit()
+
+    size = 1024*1024*2
+    compressor = Compress( is_to_compress )
+    data = sys.stdin.buffer.read(size)
+    result = bytearray( size )
+    readed_size = len(data)
+
+    while readed_size != 0:
+        compressor.process_list(data, result)
+        sys.stdout.buffer.write( result[:readed_size] )
+        data = sys.stdin.buffer.read(size)
+        readed_size = len( data )
+
