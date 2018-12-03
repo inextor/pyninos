@@ -2,6 +2,44 @@
 import sys
 import io
 
+def compress_positions(pos_list):
+    """Normalize a position list"""
+    cp_pos_list = pos_list.copy()
+    new_pos = []
+
+    for i in range(0, len(pos_list)):
+        for index, value in enumerate(cp_pos_list):
+            if i == value:
+                new_pos.append(index)
+                cp_pos_list.pop(index)
+                break
+
+    return new_pos
+
+def decompress_positions(pos_list):
+    """Unormalize position list"""
+
+    cp_pos_list = pos_list.copy()
+
+    new_pos = [-1]*len(pos_list)
+
+    for value in range(0, len(pos_list)):
+
+        compressed_position = cp_pos_list.pop(0)
+        counter = 0
+
+        for index in range(0, len(new_pos)):
+            final_value = new_pos[index]
+
+            if counter == compressed_position and final_value == -1:
+                new_pos[index] = value
+                break
+
+            if final_value == -1:
+                counter += 1
+
+    return new_pos
+
 class Compressor:
     """This class helps to count bits and bytes"""
 
@@ -109,6 +147,62 @@ class Compressor:
         sys.stderr.write("End reading dictionary")
         self.transitions_dictionary = new_dictionary
 
+    def read_dictionary_alt(self, a_buffer):
+        """Read dictionary from a buffer"""
+        new_dictionary = []
+
+        sys.stderr.write("Reading dictionaries\n")
+
+        for i in range(0, 256):
+            new_dictionary.append([])
+            unormalized_byte_list = a_buffer.read(256)
+            unormal_list = []
+
+            for k in unormalized_byte_list:
+                unormal_list.append(k)
+
+            dictionary_index = decompress_positions(unormal_list)
+
+            for index, value in enumerate(dictionary_index):
+                new_dictionary[i].append({
+                    "value":index,
+                    "freq":value,
+                    "index":value
+                })
+
+            if self.debug and i < 5:
+                dict_list = []
+
+                for dic_index in range(0, 20):
+                    dict_list.append(new_dictionary[i][dic_index]["freq"])
+
+                sys.stderr.write(str(dict_list)+"\n")
+
+            new_dictionary[i].sort(key=lambda e: e["index"])
+
+        sys.stderr.write("End reading dictionary")
+        self.transitions_dictionary = new_dictionary
+
+    def write_dictionary_alt(self, a_buffer):
+        """write dictionary to stdout"""
+        for dic_index, dictionary in enumerate(self.transitions_dictionary):
+            #dictionary.sort(key=lambda e: e["value"])
+
+            if self.debug and dic_index < 5:
+                dic_el = []
+                for ele in dictionary:
+                    dic_el.append(ele["index"])
+
+                sys.stderr.write("Elements\n")
+                sys.stderr.write(str(dic_el[0:20])+"\n")
+
+            byte_list = []
+            for obj in dictionary:
+                byte_list.append(obj["index"])
+
+            n_list = compress_positions(byte_list)
+            a_buffer.write(bytearray(n_list))
+
 
     def write_dictionary_to_buffer(self, a_buffer):
         """write dictionary to stdout"""
@@ -165,7 +259,7 @@ class Compressor:
         dictionary = self.transitions_dictionary
         result = []
 
-        self.write_dictionary_to_buffer(a_buffer)
+        self.write_dictionary_alt(a_buffer)
 
         byte_previous = 0
         next_byte = 0
@@ -230,7 +324,7 @@ if __name__ == "__main__":
         data = sys.stdin.buffer.read()
         compressor.compress_buffer(data, sys.stdout.buffer)
     else:
-        compressor.read_dictionary_from_buffer(sys.stdin.buffer)
+        compressor.read_dictionary_alt(sys.stdin.buffer)
         data = sys.stdin.buffer.read()
         compressor.decompress_buffer(data, sys.stdout.buffer)
 

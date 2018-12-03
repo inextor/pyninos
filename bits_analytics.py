@@ -155,25 +155,39 @@ class BitsAnalytics:
         total_elements = sum( list_256 )
         maximun = max( list_256 )
 
-        string_image = "P2\n1000 512\n4\n"
+        string_image = "P2\n1000 512\n12\n"
         total = 0
+
+        sys.stderr.write("Max "+str(new_list[0]*100/total_elements)+"%\n")
 
         for item in new_list:
             pixels = int(float(item)*500.0/float(maximun));
 
             tmp_str = ""
             total += item;
-            percent = int(total*100.0/total_elements)
+            percent = 100-int(total*100.0/total_elements)
 
-            for x in range(0,500):
+            for x in range(0, 500):
                 if percent > 90:
-                    tmp_str += "4 4 " if x <= pixels else "0 0 "
+                    tmp_str += "11 11 " if x <= pixels else "0 1 "
+                elif percent > 80:
+                    tmp_str += "10 10 " if x <= pixels else "0 1 "
+                elif percent > 70:
+                    tmp_str += "9 9 " if x <= pixels else "0 1 "
+                elif percent > 60:
+                    tmp_str += "8 8 " if x <= pixels else "0 1 "
                 elif percent > 50:
-                    tmp_str += "3 3 " if x <= pixels else "0 0 "
-                elif percent > 25:
-                    tmp_str += "2 2 " if x <= pixels else "0 0 "
+                    tmp_str += "7 7 " if x <= pixels else "0 1 "
+                elif percent > 40:
+                    tmp_str += "6 6 " if x <= pixels else "0 1 "
+                elif percent > 30:
+                    tmp_str += "5 5 " if x <= pixels else "0 1 "
+                elif percent > 20:
+                    tmp_str += "4 4 " if x <= pixels else "0 1 "
+                elif percent > 10:
+                    tmp_str += "3 3 " if x <= pixels else "0 1 "
                 else:
-                    tmp_str += "1 1 " if x <= pixels else "0 0 "
+                    tmp_str += "2 2 " if x <= pixels else "0 1 "
 
             for x in range(0, 2):
                 string_image += tmp_str.strip()+"\n"
