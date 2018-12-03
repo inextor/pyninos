@@ -50,7 +50,6 @@ class Compress:
 
         return to_compress if self.is_to_compress else to_decompress
 
-
 def test_transform():
     """Test the class"""
     test_list = []

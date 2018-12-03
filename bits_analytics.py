@@ -70,21 +70,21 @@ class BitsAnalytics:
             self.byte_transitions[self.byte_previous][byte_value] += 1
             self.byte_previous = byte_value
 
-            half_byte = byte_value>>4;
-            self.half_byte_transitions[ self.half_byte_previous ][ half_byte ] += 1
-            self.half_byte_previous = half_byte;
-            half_byte = (byte_value&0x0F)
-            self.half_byte_transitions[ self.half_byte_previous ][ half_byte ] += 1
+            #half_byte = byte_value>>4;
+            #self.half_byte_transitions[ self.half_byte_previous ][ half_byte ] += 1
+            #self.half_byte_previous = half_byte;
+            #half_byte = (byte_value&0x0F)
+            #self.half_byte_transitions[ self.half_byte_previous ][ half_byte ] += 1
 
-            self.half_byte_previous = half_byte
+            #self.half_byte_previous = half_byte
 
-        except Exception as e:
-            print("Excpetion on ",e );
-            print("Excpetion on ",self.half_byte);
-            print("Excpetion on ",byte_value );
-            print("dupla counter ",len( self.dupla_counter ) )
-            print("byte counter ",len( self.byte_counter ) )
-            print("bit counter ",len( self.bit_counter ) )
+        except Exception as e_f:
+            print("Excpetion on ", e_f )
+            #print("Excpetion on ",self.half_byte)
+            #print("Excpetion on ",byte_value );
+            #print("dupla counter ",len( self.dupla_counter ) )
+            #print("byte counter ",len( self.byte_counter ) )
+            #print("bit counter ",len( self.bit_counter ) )
 
     def process_list(self, byte_list):
         """Process a list of bytes"""
@@ -128,9 +128,8 @@ class BitsAnalytics:
                 if j > max_value:
                     max_value = j
 
-        print("Max Value", max_value )
 
-        image = "P2\n1024\n1024\n"
+        image = "P2\n1024\n1024\n255\n"
 
         for i in self.byte_transitions:
             image_line = ""
@@ -156,8 +155,6 @@ class BitsAnalytics:
         total_elements = sum( list_256 )
         maximun = max( list_256 )
 
-        print("Total",total_elements)
-
         string_image = "P2\n1000 512\n4\n"
         total = 0
 
@@ -178,7 +175,7 @@ class BitsAnalytics:
                 else:
                     tmp_str += "1 1 " if x <= pixels else "0 0 "
 
-            for x in range(0,2):
+            for x in range(0, 2):
                 string_image += tmp_str.strip()+"\n"
 
         return string_image
@@ -225,6 +222,15 @@ if __name__ == "__main__":
 
     b = BitsAnalytics()
 
+    is_bars = False
+
+    if( len( sys.argv ) > 1 ):
+        #print(">2")
+        if(sys.argv[1].find('-') != -1):
+            #print("------")
+            if(sys.argv[1].find('b') != -1 ):
+                is_bars = True
+
     size = 1024*1024*2
     data = sys.stdin.buffer.read(size)
     result = bytearray( size )
@@ -237,9 +243,11 @@ if __name__ == "__main__":
 
     #b.printx()
     #print( b.generate_half_byte_dictionary() );
-    print( b.generate_bars_image( b.generate_pos_dictionary() ) );
     #b.generate_transitions_image()
-    #print( b.generate_bars_image( b.generate_transitions_image()) )
+    if is_bars:
+        print( b.generate_bars_image( b.generate_pos_dictionary() ) )
+    else:
+        print(  b.generate_transitions_image() )
 
 
 #   1 2 3 4
