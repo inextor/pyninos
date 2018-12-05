@@ -14,6 +14,7 @@ class BitsAnalytics:
         self.half_byte_previous = 0
         self.byte_transitions = []
         self.half_byte_transitions = []
+        self.b_bits = [0,0,0,0,0,0,0,0]
 
         self.bit_dictionary = [[], []]
         self.dupla_dictionary = [[], [], [], []]
@@ -69,6 +70,10 @@ class BitsAnalytics:
 
             self.byte_transitions[self.byte_previous][byte_value] += 1
             self.byte_previous = byte_value
+
+            for i in range(0, 8):
+                if (1 << (7-i)) & byte_value:
+                    self.b_bits[i] += 1
 
             #half_byte = byte_value>>4;
             #self.half_byte_transitions[ self.half_byte_previous ][ half_byte ] += 1
@@ -159,7 +164,7 @@ class BitsAnalytics:
         total = 0
 
         sys.stderr.write("Max "+str(new_list[0]*100/total_elements)+"%\n")
-
+        line = 0;
         for item in new_list:
             pixels = int(float(item)*500.0/float(maximun));
 
@@ -167,9 +172,14 @@ class BitsAnalytics:
             total += item;
             percent = 100-int(total*100.0/total_elements)
 
+            if( line == 10 ):
+                sys.stderr.write("In 10 "+str(total*100/total_elements)+"%\n")
+
+            line += 1
+
             for x in range(0, 500):
                 if percent > 90:
-                    tmp_str += "11 11 " if x <= pixels else "0 1 "
+                    tmp_str += "11 3 " if x <= pixels else "0 1 "
                 elif percent > 80:
                     tmp_str += "10 10 " if x <= pixels else "0 1 "
                 elif percent > 70:
@@ -194,13 +204,13 @@ class BitsAnalytics:
 
         return string_image
 
-
     def printx(self):
         """Print the stats"""
-        #print("t bytes", self.total)
-        #print("bits", self.bit_counter)
-        #print("duplas", self.dupla_counter)
-        #print("Counter Average", sum(self.byte_counter)/256.0)
+        print("t bytes", self.total)
+        print("bits", self.bit_counter)
+        print("duplas", self.dupla_counter)
+        print("Counter Average", sum(self.byte_counter)/256.0)
+        print("R Bits ", self.b_bits)
 
         byte_diff_sum = 0
 
@@ -234,34 +244,44 @@ class BitsAnalytics:
 
 if __name__ == "__main__":
 
-    b = BitsAnalytics()
 
     is_bars = False
+    print_graph = True
 
     if( len( sys.argv ) > 1 ):
         #print(">2")
         if(sys.argv[1].find('-') != -1):
             #print("------")
-            if(sys.argv[1].find('b') != -1 ):
+            if sys.argv[1].find('b') != -1:
                 is_bars = True
+            if sys.argv[1].find('p') != -1:
+                print_graph = False
 
-    size = 1024*1024*2
-    data = sys.stdin.buffer.read(size)
-    result = bytearray( size )
-    readed_size = len(data)
-
-    while readed_size != 0:
-        b.process_list( data )
-        data = sys.stdin.buffer.read(size)
-        readed_size = len( data )
-
-    #b.printx()
-    #print( b.generate_half_byte_dictionary() );
-    #b.generate_transitions_image()
-    if is_bars:
-        print( b.generate_bars_image( b.generate_pos_dictionary() ) )
+    if print_graph:
+        b = BitsAnalytics()
+        data = sys.stdin.buffer.read()
+        b.process_list( data)
+        if is_bars:
+            print( b.generate_bars_image( b.generate_pos_dictionary() ) )
+        else:
+            print(  b.generate_transitions_image() )
     else:
-        print(  b.generate_transitions_image() )
+        bi_global = BitsAnalytics()
+        data = sys.stdin.buffer.read()
+        bitan = []
+        for i in range(0, 256):
+            bitan.append( BitsAnalytics())
+
+        counter = 0
+
+        for i in data:
+            #sys.stderr.write("FoOOOOOOOO"+str(counter%256)+"\n")
+            bitan[counter%256].process(i)
+            bi_global.process(i)
+            counter += 1
+
+        for i in bitan:
+            i.printx()
 
 
 #   1 2 3 4
