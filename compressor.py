@@ -134,10 +134,10 @@ class Compressor:
                     "index":value
                 })
 
-            if self.debug and i < 5:
+            if self.debug:
                 dict_list = []
 
-                for dic_index in range(0, 20):
+                for dic_index in range(0, 256):
                     dict_list.append(new_dictionary[i][dic_index]["freq"])
 
                 sys.stderr.write(str(dict_list)+"\n")
@@ -155,11 +155,13 @@ class Compressor:
 
         for i in range(0, 256):
             new_dictionary.append([])
-            unormalized_byte_list = a_buffer.read(256)
+            unormalized_byte_list = a_buffer.read(255)
             unormal_list = []
 
             for k in unormalized_byte_list:
                 unormal_list.append(k)
+            unormal_list.append(0)
+            sys.stderr.write("Uncompresed"+str(unormal_list)+"\n")
 
             dictionary_index = decompress_positions(unormal_list)
 
@@ -188,7 +190,7 @@ class Compressor:
         for dic_index, dictionary in enumerate(self.transitions_dictionary):
             #dictionary.sort(key=lambda e: e["value"])
 
-            if self.debug and dic_index < 5:
+            if self.debug:
                 dic_el = []
                 for ele in dictionary:
                     dic_el.append(ele["index"])
@@ -201,6 +203,7 @@ class Compressor:
                 byte_list.append(obj["index"])
 
             n_list = compress_positions(byte_list)
+            n_list.pop(255)
             a_buffer.write(bytearray(n_list))
 
 

@@ -91,7 +91,7 @@ class Node:
         arrow = ">" if self.branch == 1 else "<"
 
         if self.value is not None:
-            return arrow+str(self.value)+","+str(self.freq)+"   "
+            return arrow+str(self.value)+","+str(self.huff_string)+"   "
 
         return arrow+"   ,   "
 
@@ -151,7 +151,9 @@ def get_huffman_dictionary(frequency_list):
 
 
 if __name__ == "__main__":
-    get_huffman_dictionary([ 7, 4, 4, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1 ])
+    #get_huffman_dictionary([ 7, 4, 4, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1 ])
+    get_huffman_dictionary([53451,53037,52756,52614,52495,52277,52160,52029,51851,51738,51598,51439,51190,51000,50664,50183])
+
 
 
 
