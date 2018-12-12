@@ -262,12 +262,14 @@ if __name__ == "__main__":
         data = sys.stdin.buffer.read()
         b.process_list( data)
         if is_bars:
-            print( b.generate_bars_image( b.generate_pos_dictionary() ) )
+            b.byte_diff.sort(reverse=True)
+            print( b.generate_bars_image( b.byte_diff ) );#b.generate_pos_dictionary() ) )
         else:
             print(  b.generate_transitions_image() )
     else:
         bi_global = BitsAnalytics()
         data = sys.stdin.buffer.read()
+
         bitan = []
         for i in range(0, 256):
             bitan.append( BitsAnalytics())
@@ -282,6 +284,8 @@ if __name__ == "__main__":
 
         for i in bitan:
             i.printx()
+
+        bi_global.printx()
 
 
 #   1 2 3 4
